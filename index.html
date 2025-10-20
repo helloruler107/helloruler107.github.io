@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>엔젤 디데이 계산기</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 30px auto;
+      transition: background 1s ease;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input[type="text"], input[type="date"], input[type="time"] {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    #result {
+      font-size: 1.2em;
+      margin: 15px 0;
+    }
+    img {
+      width: 100%;
+      height: auto;
+      margin-top: 20px;
+      border: 2px dashed #ccc;
+      transition: transform 0.3s ease;
+    }
+
+    /* 심장 두근두근 애니메이션 */
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    img:hover {
+      animation: heartbeat 0.6s infinite;
+      cursor: pointer;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .rainbow-bg {
+      background: linear-gradient(270deg,
+        red, orange, yellow, green, blue, indigo, violet, red);
+      background-size: 1400% 1400%;
+      animation: rainbow 1s linear;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    .radio-group input[type="radio"] {
+      display: none;
+    }
+    .radio-group label {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #ddd;
+      cursor: pointer;
+      border: 2px solid transparent;
+      display: inline-block;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    .radio-group input[type="radio"]:checked + label {
+      background-color: #666;
+      border-color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>엔젤 디데이 계산기 ϵ(っꈍᗜꈍς)϶</h2>
+  <label for="name">이름</label>
+  <input type="text" id="name" placeholder="이름을 입력하세요" />
+
+  <label for="date">마감 날짜</label>
+  <input type="date" id="date" min="2000-01-01" />
+
+  <label for="time">마감 시간</label>
+  <input type="time" id="time" step="1" />
+
+  <button id="calculateBtn">확인</button>
+  <div id="result"></div>
+
+  <div class="radio-group">
+    <input type="radio" id="img1" name="image" value="https://static.wikia.nocookie.net/projectsekai/images/5/5b/Len.png/revision/latest/scale-to-width-down/1200?cb=20230616205019" checked>
+    <label for="img1" title="이미지 1"></label>
+
+    <input type="radio" id="img2" name="image" value="https://i.pinimg.com/originals/e4/54/91/e454912f792c731d42d4e54a8cf86f09.gif">
+    <label for="img2" title="이미지 2"></label>
+
+    <input type="radio" id="img3" name="image" value="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUyMnU3bnl2ZjE2ZjU5cjUxNGI1M3I4czR0ZGUxeXBlZGcyNGs0OWdjdyZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/wLlaNFsf5DAiNnxqH5/giphy.gif">
+    <label for="img3" title="이미지 3"></label>
+  </div>
+
+  <img src="" alt="이미지 자리" id="imageDisplay" />
+
+  <script>
+    // 현재 시간으로 날짜와 시간 초기값 설정
+    function pad(num) {
+      return num.toString().padStart(2, '0');
+    }
+    const now = new Date();
+    const dateInput = document.getElementById('date');
+    const timeInput = document.getElementById('time');
+    dateInput.value = now.toISOString().slice(0,10);
+    timeInput.value = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+    const radios = document.querySelectorAll('input[name="image"]');
+    const imageDisplay = document.getElementById('imageDisplay');
+
+    // 사이트 접속 시 기본 선택된 라디오 버튼 이미지 설정
+    const defaultRadio = document.querySelector('input[name="image"]:checked');
+    if (defaultRadio) {
+      imageDisplay.src = defaultRadio.value;
+    }
+
+    radios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked) {
+          imageDisplay.src = radio.value;
+        }
+      });
+    });
+
+    let timer;
+    document.getElementById('calculateBtn').onclick = function () {
+      if (timer) clearInterval(timer);
+
+      const name = document.getElementById('name').value || '이름없음';
+      const dateValue = dateInput.value;
+      const timeValue = timeInput.value || '00:00:00';
+
+      if (!dateValue) {
+        alert("마감 날짜를 선택하세요.");
+        return;
+      }
+
+      function triggerRainbow() {
+        document.body.classList.add('rainbow-bg');
+        setTimeout(() => {
+          document.body.classList.remove('rainbow-bg');
+        }, 1000);
+      }
+
+      function update() {
+        const [hour, minute, second] = timeValue.split(':').map(Number);
+        const target = new Date(dateValue);
+        target.setHours(hour, minute, second, 0);
+
+        const now = new Date();
+        const diff = target - now;
+
+        let days, hours, minutes, seconds;
+        if (diff >= 0) {
+          days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          minutes = Math.floor((diff / (1000 * 60)) % 60);
+          seconds = Math.floor((diff / 1000) % 60);
+
+          const dayText = (days === 0) ? 'D-day' : `D-${days}`;
+          document.getElementById('result').textContent =
+            `${name}님의 D-day: ${dayText} (${days}일 ${hours}시간 ${minutes}분 ${seconds}초 남음)`;
+
+          if (diff < 1000) {
+            triggerRainbow();
+          }
+        } else {
+          const passed = Math.abs(diff);
+          days = Math.floor(passed / (1000 * 60 * 60 * 24));
+          hours = Math.floor((passed / (1000 * 60 * 60)) % 24);
+          minutes = Math.floor((passed / (1000 * 60)) % 60);
+          seconds = Math.floor((passed / 1000) % 60);
+
+          document.getElementById('result').textContent =
+            `${name}님의 디데이 ϵ(っꈍᗜꈍς)϶: D+${days} (${days}일 ${hours}시간 ${minutes}분 ${seconds}초 경과)`;
+        }
+      }
+      update();
+      timer = setInterval(update, 1000);
+    };
+  </script>
+</body>
+</html>
