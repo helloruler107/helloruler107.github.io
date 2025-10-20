@@ -104,11 +104,14 @@
 
   <img src="" alt="이미지 자리" id="imageDisplay" />
 
-  <script>
-    // 현재 시간으로 날짜와 시간 초기값 설정
-    function pad(num) {
-      return num.toString().padStart(2, '0');
-    }
+<script>
+  // 날짜와 시간 초기값 설정 함수
+  function pad(num) {
+    return num.toString().padStart(2, '0');
+  }
+
+  // DOMContentLoaded 이벤트 내에서 초기화
+  document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const dateInput = document.getElementById('date');
     const timeInput = document.getElementById('time');
@@ -118,7 +121,7 @@
     const radios = document.querySelectorAll('input[name="image"]');
     const imageDisplay = document.getElementById('imageDisplay');
 
-    // 사이트 접속 시 기본 선택된 라디오 버튼 이미지 설정
+    // **여기서 기본 체크된 radio 이미지로 src 자동 설정**
     const defaultRadio = document.querySelector('input[name="image"]:checked');
     if (defaultRadio) {
       imageDisplay.src = defaultRadio.value;
@@ -188,6 +191,8 @@
       update();
       timer = setInterval(update, 1000);
     };
-  </script>
+  }); // end DOMContentLoaded
+</script>
+
 </body>
 </html>
